@@ -449,7 +449,7 @@ async function submitForm(){
   const {org,rep,area,date,body,yesCount,noCount,total}=buildReport();
 
   try {
-    const res=await fetch(`${SUPABASE_URL}/functions/v1/send-report`,{
+    const res=await fetch(`${SUPABASE_URL}/functions/v1/smooth-responder`,{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':`Bearer ${SUPABASE_ANON_KEY}`},
       body:JSON.stringify({
