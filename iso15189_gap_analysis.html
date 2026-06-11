@@ -364,32 +364,38 @@ if (saved) {
   updateProgress();
 }
 
-function setAnswer(id,val){
-  answers[id]={answer:val,evidence:answers[id]?.evidence||''};
-  const card=document.getElementById('card-'+id);
-  const evBox=document.getElementById('ev-'+id);
-  const evLbl=document.getElementById('ev-lbl-'+id);
-  const evInp=document.getElementById('ev-inp-'+id);
-  card.classList.remove('ans-yes','ans-no');
-  card.querySelectorAll('.yn-btn').forEach(b=>b.classList.remove('sel'));
-  if(val==='yes'){
+function setAnswer(id, val) {
+  if (!answers[id]) answers[id] = { answer: val, evidence: '' };
+  else answers[id].answer = val;
+  
+  const card = document.getElementById('card-' + id);
+  const evBox = document.getElementById('ev-' + id);
+  const evLbl = document.getElementById('ev-lbl-' + id);
+  const evInp = document.getElementById('ev-inp-' + id);
+  card.classList.remove('ans-yes', 'ans-no');
+  card.querySelectorAll('.yn-btn').forEach(b => b.classList.remove('sel'));
+  if (val === 'yes') {
     card.classList.add('ans-yes');
     card.querySelector('.yn-btn.yes').classList.add('sel');
-    evLbl.textContent='SOP number or document reference';
-    evInp.placeholder='e.g. SOP-QMS-001, Page 4, Para 2.1';
+    evLbl.textContent = 'SOP number or document reference';
+    evInp.placeholder = 'e.g. SOP-QMS-001, Page 4, Para 2.1';
   } else {
     card.classList.add('ans-no');
     card.querySelector('.yn-btn.no').classList.add('sel');
-    evLbl.textContent='Explain the gap or reason for non-compliance';
-    evInp.placeholder='Describe what is missing or not yet implemented';
+    evLbl.textContent = 'Explain the gap or reason for non-compliance';
+    evInp.placeholder = 'Describe what is missing or not yet implemented';
   }
   evBox.classList.add('show');
-  updateProgress(); updateNavDots();
- localStorage.setItem('mgmtAnswers', JSON.stringify(answers));
+  localStorage.setItem('mgmtAnswers', JSON.stringify(answers)); // save here
+  updateProgress();
+  updateNavDots();
 }
 
-function saveEvidence(id,val){ if(answers[id]) answers[id].evidence=val;
-localStorage.setItem('mgmtAnswers', JSON.stringify(answers));}
+function saveEvidence(id, val) {
+  if (!answers[id]) answers[id] = { answer: null, evidence: val };
+  else answers[id].evidence = val;
+  localStorage.setItem('mgmtAnswers', JSON.stringify(answers));
+}
 
 function updateProgress(){
   const total=SECTIONS.reduce((a,s)=>a+s.clauses.length,0);
@@ -399,10 +405,10 @@ function updateProgress(){
   document.getElementById('prog-text').textContent=done+' of '+total+' questions answered';
   document.getElementById('prog-pct').textContent=pct+'%';
  Object.entries(answers).forEach(([id, val]) => {
-  setAnswer(id, val.answer);
-  if (val.evidence) {
+  if (val.answer) {
+    setAnswer(id, val.answer);
     const inp = document.getElementById('ev-inp-' + id);
-    if (inp) inp.value = val.evidence;
+    if (inp && val.evidence) inp.value = val.evidence;
   }
 });
 }
