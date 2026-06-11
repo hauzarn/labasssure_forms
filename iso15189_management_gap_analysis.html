@@ -375,6 +375,15 @@ function buildForm(){
   updateProgress();
 }
  
+function updateProgress(){
+  const total=SECTIONS.reduce((a,s)=>a+s.clauses.length,0);
+  const done=Object.keys(answers).filter(k=>answers[k].answer).length;
+  const pct=Math.round(done/total*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-text').textContent=done+' of '+total+' questions answered';
+  document.getElementById('prog-pct').textContent=pct+'%';
+}
+ 
 function setAnswer(id, val) {
   if (!answers[id]) answers[id] = { answer: val, evidence: '' };
   else answers[id].answer = val;
@@ -407,18 +416,7 @@ function saveEvidence(id, val) {
   else answers[id].evidence = val;
   localStorage.setItem('mgmtAnswers', JSON.stringify(answers));
 }
-
-function updateProgress(){
-  const total=SECTIONS.reduce((a,s)=>a+s.clauses.length,0);
-  const done=Object.keys(answers).filter(k=>answers[k].answer).length;
-  const pct=Math.round(done/total*100);
-  document.getElementById('prog-fill').style.width=pct+'%';
-  document.getElementById('prog-text').textContent=done+' of '+total+' questions answered';
-  document.getElementById('prog-pct').textContent=pct+'%';
-}
-});
-}
-
+ 
 function updateNavDots(){
   SECTIONS.forEach((sec,si)=>{
     const allDone=sec.clauses.every(cl=>answers[cl.id]);
