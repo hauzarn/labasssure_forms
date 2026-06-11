@@ -341,6 +341,11 @@ async function validateToken(){
 
 // ── Form builder ──
 function buildForm(){
+ const saved = localStorage.getItem('techAnswers');
+if (saved) {
+  const parsed = JSON.parse(saved);
+  Object.assign(answers, parsed);
+}
   const nav=document.getElementById('section-nav');
   const container=document.getElementById('sections-container');
   const total=SECTIONS.reduce((a,s)=>a+s.clauses.length,0);
@@ -403,9 +408,19 @@ function setAnswer(id,val){
   }
   evBox.classList.add('show');
   updateProgress(); updateNavDots();
+ localStorage.setItem('techAnswers', JSON.stringify(answers));
+ Object.entries(answers).forEach(([id, val]) => {
+  setAnswer(id, val.answer);
+  if (val.evidence) {
+    const inp = document.getElementById('ev-inp-' + id);
+    if (inp) inp.value = val.evidence;
+  }
+});
 }
 
-function saveEvidence(id,val){ if(answers[id]) answers[id].evidence=val; }
+function saveEvidence(id,val){ if(answers[id]) answers[id].evidence=val;
+localStorage.setItem('techAnswers', JSON.stringify(answers));
+}
 
 function updateProgress(){
   const total=SECTIONS.reduce((a,s)=>a+s.clauses.length,0);
@@ -489,6 +504,7 @@ async function submitForm(){
     document.getElementById('app').style.display='none';
     document.getElementById('submit-screen').style.display='block';
     window.scrollTo({top:0,behavior:'smooth'});
+    localStorage.removeItem('techAnswers');
   } catch(e){
     btn.disabled=false;
     btn.textContent='Submit gap analysis →';
