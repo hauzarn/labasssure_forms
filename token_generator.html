@@ -81,6 +81,19 @@
     <span class="result-link" id="result-link"></span>
     <button class="copy-btn" onclick="copyLink()">Copy link</button>
   </div>
+ <div class="result-card" id="result-card">
+  <div class="result-label">✓ Access link ready — copy and send to your client</div>
+  <span class="result-link" id="result-link"></span>
+  <button class="copy-btn" onclick="copyLink()">Copy link</button>
+
+  <div style="margin-top:1rem;padding-top:1rem;border-top:0.5px solid var(--border)">
+    <div class="result-label">Token only — for manual entry</div>
+    <span class="result-link" id="result-token"></span>
+    <button class="copy-btn" onclick="copyToken()">Copy token</button>
+  </div>
+</div>
+
+ 
 
   <div class="history" id="history-section" style="display:none">
     <h2>Recent tokens</h2>
@@ -131,8 +144,9 @@ async function generateToken(){
       const err=await res.text();
       throw new Error(err);
     }
-    const fullLink=`${formUrl}?token=${token}`;
-    document.getElementById('result-link').textContent=fullLink;
+    const fullLink = `${formUrl}?token=${token}`;
+document.getElementById('result-link').textContent = fullLink;
+document.getElementById('result-token').textContent = token;
     document.getElementById('result-card').classList.add('visible');
     btn.disabled=false; btn.textContent='Generate access link';
     loadHistory(sbUrl,sbKey);
@@ -151,7 +165,15 @@ function copyLink(){
     setTimeout(()=>btn.textContent='Copy link',2000);
   });
 }
-
+ 
+function copyToken() {
+  const token = document.getElementById('result-token').textContent;
+  navigator.clipboard.writeText(token).then(() => {
+    const btns = document.querySelectorAll('.copy-btn');
+    btns[1].textContent = '✓ Copied!';
+    setTimeout(() => btns[1].textContent = 'Copy token', 2000);
+  });
+}
 async function loadHistory(sbUrl,sbKey){
   try{
     const res=await fetch(`${sbUrl}/rest/v1/tokens?select=*&order=created_at.desc&limit=10`,{
