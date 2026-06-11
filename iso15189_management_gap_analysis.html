@@ -321,11 +321,11 @@ async function validateToken(){
 
 // ── Form builder ──
 function buildForm(){
- const saved = localStorage.getItem('mgmtAnswers');
-if (saved) {
-  const parsed = JSON.parse(saved);
-  Object.assign(answers, parsed);
-}
+  const saved = localStorage.getItem('mgmtAnswers');
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    Object.assign(answers, parsed);
+  }
   const nav=document.getElementById('section-nav');
   const container=document.getElementById('sections-container');
   SECTIONS.forEach((sec,si)=>{
@@ -362,9 +362,19 @@ if (saved) {
     }
     container.appendChild(sd);
   });
+
+  // Restore saved answers AFTER DOM is built
+  Object.entries(answers).forEach(([id, val]) => {
+    if (val.answer) {
+      setAnswer(id, val.answer);
+      const inp = document.getElementById('ev-inp-' + id);
+      if (inp && val.evidence) inp.value = val.evidence;
+    }
+  });
+
   updateProgress();
 }
-
+ 
 function setAnswer(id, val) {
   if (!answers[id]) answers[id] = { answer: val, evidence: '' };
   else answers[id].answer = val;
@@ -400,17 +410,12 @@ function saveEvidence(id, val) {
 
 function updateProgress(){
   const total=SECTIONS.reduce((a,s)=>a+s.clauses.length,0);
-  const done=Object.keys(answers).length;
+  const done=Object.keys(answers).filter(k=>answers[k].answer).length;
   const pct=Math.round(done/total*100);
   document.getElementById('prog-fill').style.width=pct+'%';
   document.getElementById('prog-text').textContent=done+' of '+total+' questions answered';
   document.getElementById('prog-pct').textContent=pct+'%';
- Object.entries(answers).forEach(([id, val]) => {
-  if (val.answer) {
-    setAnswer(id, val.answer);
-    const inp = document.getElementById('ev-inp-' + id);
-    if (inp && val.evidence) inp.value = val.evidence;
-  }
+}
 });
 }
 
