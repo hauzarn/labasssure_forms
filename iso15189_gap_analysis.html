@@ -320,6 +320,11 @@ async function validateToken(){
 
 // ── Form builder ──
 function buildForm(){
+ const saved = localStorage.getItem('mgmtAnswers');
+if (saved) {
+  const parsed = JSON.parse(saved);
+  Object.assign(answers, parsed);
+}
   const nav=document.getElementById('section-nav');
   const container=document.getElementById('sections-container');
   SECTIONS.forEach((sec,si)=>{
@@ -380,9 +385,11 @@ function setAnswer(id,val){
   }
   evBox.classList.add('show');
   updateProgress(); updateNavDots();
+ localStorage.setItem('mgmtAnswers', JSON.stringify(answers));
 }
 
-function saveEvidence(id,val){ if(answers[id]) answers[id].evidence=val; }
+function saveEvidence(id,val){ if(answers[id]) answers[id].evidence=val;
+localStorage.setItem('mgmtAnswers', JSON.stringify(answers));}
 
 function updateProgress(){
   const total=SECTIONS.reduce((a,s)=>a+s.clauses.length,0);
@@ -391,6 +398,13 @@ function updateProgress(){
   document.getElementById('prog-fill').style.width=pct+'%';
   document.getElementById('prog-text').textContent=done+' of '+total+' questions answered';
   document.getElementById('prog-pct').textContent=pct+'%';
+ Object.entries(answers).forEach(([id, val]) => {
+  setAnswer(id, val.answer);
+  if (val.evidence) {
+    const inp = document.getElementById('ev-inp-' + id);
+    if (inp) inp.value = val.evidence;
+  }
+});
 }
 
 function updateNavDots(){
@@ -466,6 +480,7 @@ async function submitForm(){
     document.getElementById('app').style.display='none';
     document.getElementById('submit-screen').style.display='block';
     window.scrollTo({top:0,behavior:'smooth'});
+   localStorage.removeItem('mgmtAnswers');
   } catch(e){
     btn.disabled=false;
     btn.textContent='Submit gap analysis →';
