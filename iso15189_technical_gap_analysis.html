@@ -342,15 +342,13 @@ async function validateToken(){
 
 // ── Form builder ──
 function buildForm(){
- const saved = localStorage.getItem('techAnswers');
-if (saved) {
-  const parsed = JSON.parse(saved);
-  Object.assign(answers, parsed);
-}
+  const saved = localStorage.getItem('techAnswers');
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    Object.assign(answers, parsed);
+  }
   const nav=document.getElementById('section-nav');
   const container=document.getElementById('sections-container');
-  const total=SECTIONS.reduce((a,s)=>a+s.clauses.length,0);
-  document.getElementById('prog-text').textContent='0 of '+total+' questions answered';
   SECTIONS.forEach((sec,si)=>{
     const nb=document.createElement('button');
     nb.className='nav-btn'+(si===0?' active':'');
@@ -385,7 +383,26 @@ if (saved) {
     }
     container.appendChild(sd);
   });
+
+  // Restore saved answers AFTER DOM is built
+  Object.entries(answers).forEach(([id, val]) => {
+    if (val.answer) {
+      setAnswer(id, val.answer);
+      const inp = document.getElementById('ev-inp-' + id);
+      if (inp && val.evidence) inp.value = val.evidence;
+    }
+  });
+
   updateProgress();
+}
+
+function updateProgress(){
+  const total=SECTIONS.reduce((a,s)=>a+s.clauses.length,0);
+  const done=Object.keys(answers).filter(k=>answers[k].answer).length;
+  const pct=Math.round(done/total*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-text').textContent=done+' of '+total+' questions answered';
+  document.getElementById('prog-pct').textContent=pct+'%';
 }
 
 function setAnswer(id, val) {
@@ -427,15 +444,6 @@ function saveEvidence(id, val) {
   if (!answers[id]) answers[id] = { answer: null, evidence: val };
   else answers[id].evidence = val;
   localStorage.setItem('techAnswers', JSON.stringify(answers));
-}
-
-function updateProgress(){
-  const total=SECTIONS.reduce((a,s)=>a+s.clauses.length,0);
-  const done=Object.keys(answers).length;
-  const pct=Math.round(done/total*100);
-  document.getElementById('prog-fill').style.width=pct+'%';
-  document.getElementById('prog-text').textContent=done+' of '+total+' questions answered';
-  document.getElementById('prog-pct').textContent=pct+'%';
 }
 
 function updateNavDots(){
